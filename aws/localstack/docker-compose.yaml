@@ -1,0 +1,31 @@
+version: "3.6"
+
+services:
+  localstack:
+    environment:
+      - DEBUG=1
+      - LOCALSTACK_HOSTNAME=localhost
+      - TEST_AWS_ACCOUNT_ID=000000000000
+      - LAMBDA_EXECUTOR=local
+      - AWS_DEFAULT_REGION=eu-central-1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DATA_DIR=/tmp/localstack/data
+      - KINESIS_STREAM_SHARDS=1
+      - KINESIS_ERROR_PROBABILITY=0.0
+      - KINESIS_STREAM_NAME=kinesis-stream
+      - KINESIS_PROVIDER=kinesalite
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  api-server:
+    environment:
+      - S3_URL=http://localstack:4566
+    build:
+      context: ./api-server
+    ports:
+      - "3333:3333"
+    volumes:
+      - .aws:/root/.aws
